@@ -21,9 +21,8 @@ if (!supabaseAnonKey) {
   throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY")
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export default function RootLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode
