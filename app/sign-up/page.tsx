@@ -1,42 +1,30 @@
+"use client";
+
 import React from "react";
-import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import { useFormState } from "react-dom";
+import { sign } from "crypto";
+import { signUp } from "../actions";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export default function SignUp({
+  searchParams,
+}: {
+  searchParams: { message: string };
+}) {
+  const [result, formAction] = useFormState(signUp, null);
 
-export default function SignUp() {
-  const signUp = async (formData: FormData) => {
-    "use server";
+  // const magicLink = async (formData: FormData) => {
+  //   "use server";
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  //   const email = formData.get("email") as string;
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      console.log(error);
-    }
-
-    console.log(data);
-  };
-
-  const magicLink = async (formData: FormData) => {
-    "use server";
-
-    const email = formData.get("email") as string;
-
-    // Sign in with magic links
-  };
+  //   // Sign in with magic links
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-      <div>
+        <div>
           <Link
             href="/login"
             className="flex items-center text-gray-600 hover:text-gray-500"
@@ -63,7 +51,7 @@ export default function SignUp() {
             Sign up for an account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" action={signUp}>
+        <form className="mt-8 space-y-6" action={formAction}>
           <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -103,6 +91,12 @@ export default function SignUp() {
             >
               Sign Up
             </button>
+            {searchParams?.message && (
+              <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
+                {searchParams.message}
+                {result}
+              </p>
+            )}
           </div>
         </form>
       </div>

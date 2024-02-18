@@ -6,16 +6,17 @@ import AuthButton from "./AuthButton"
 
 export default function Header() {
   return (
-    <header className="flex items-center py-4">
-      <div className="container flex items-center gap-4 px-4 text-gray-900 dark:text-gray-50 md:px-6">
-        <Link className="flex items-center gap-2 font-semibold" href="#">
-          <HomeIcon className="w-6 h-6" />
-          Home
-        </Link>
-        <div className="flex-1" />
-       <AuthButton />
-      </div>
-    </header>
+<header className="bg-white dark:bg-gray-800 shadow">
+  <div className="container mx-auto flex items-center py-4 px-4 md:px-6 text-gray-900 dark:text-gray-50">
+    <Link className="flex items-center gap-2 font-semibold text-lg hover:text-blue-500 dark:hover:text-blue-400" href="/">
+      <HomeIcon className="w-6 h-6 text-current" />
+      Home
+    </Link>
+    <div className="flex-1" />
+    <AuthButton className="text-sm px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" />
+  </div>
+</header>
+
   )
 }
 

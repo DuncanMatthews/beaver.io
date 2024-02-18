@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import { ReloadIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import AuthButton from "./components/AuthButton";
+import { TypeAnimation } from "react-type-animation";
 
 import {
   Select,
@@ -186,59 +187,80 @@ export default function Home() {
     console.log(e);
   };
   return (
-    <div className="flex h-screen w-full items-center justify-center">
-    {summarizeDetail ? (
-      <div className="rounded-xl p-6 bg-white shadow-lg max-w-[800px] mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-4">Video Summary</h2>
-        <p className="text-lg text-gray-800 leading-relaxed">{summarizeDetail}</p>
-      </div>
-    ) : (
-      <div className="flex flex-col items-center space-y-8 rounded-lg p-12">
-        <span>
-          <h1 className="font-bold text-6xl bg-gradient-to-r from-violet-400 via-blue-600 to-violet-700 inline-block text-transparent bg-clip-text">
-            Repurpose
-          </h1>
-        </span>
-        <span>
-          <h1 className="font-bold text-6xl">Popular Youtube Content</h1>
-        </span>
-        {selectedOption && (
-          <p className="text-lg text-black">
-            {descriptions[selectedOption as keyof typeof descriptions]}
+    <div className="flex  w-full items-center justify-center">
+      {summarizeDetail ? (
+        <div className="rounded-xl p-6 bg-white shadow-lg max-w-[800px] mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-4">Video Summary</h2>
+          <p className="text-lg text-gray-800 leading-relaxed">
+            {summarizeDetail}
           </p>
-        )}
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full max-w-lg items-center space-x-4"
-        >
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter YouTube video link"
-            className="flex-grow"
-          />
-          <Select onValueChange={handleOnChange} defaultValue="">
-            <SelectTrigger id="textOperation">
-              <SelectValue placeholder="Choose Operation" />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              <SelectItem value="article">Generate Article</SelectItem>
-              <SelectItem value="repurpose">Repurpose Content</SelectItem>
-              <SelectItem value="summary">Summarize Video</SelectItem>
-              <SelectItem value="transcribe">Transcribe Video</SelectItem>
-              {/* Add other operations as needed */}
-            </SelectContent>
-          </Select>
-          <Button disabled={loading} className="bg-[#0d6efd]">
-            Analyze
-            {loading && <ReloadIcon className="ml-2 h-4 w-4 animate-spin" />}
-            {!loading && <MagnifyingGlassIcon className="ml-2 h-4 w-4" />}
-          </Button>
-        </form>
-        {summarizeLoading && <div>Loading...</div>}
-      </div>
-    )}
-  </div>
-  
+        </div>
+      ) : (
+        <div className="flex flex-col items-center space-y-8 rounded-lg p-12">
+          <span>
+            <h1 className="font-bold text-6xl bg-gradient-to-r from-violet-400 via-blue-600 to-violet-700 inline-block text-transparent bg-clip-text">
+              Repurpose
+            </h1>
+          </span>
+
+          <span>
+            <h1 className="font-bold text-6xl">Popular Youtube Video&apos;s</h1>
+          </span>
+          {!selectedOption && (
+            <TypeAnimation
+              sequence={[
+                // Same substring at the start will only be typed out once, initially
+                "for Podcasts",
+                1000, // wait 1s before replacing "Mice" with "Hamsters"
+                "for Articles",
+                1000,
+                "for Video Transcripts",
+                1000,
+                "for Summaries",
+                1000,
+              ]}
+              wrapper="span"
+              speed={50}
+              style={{ fontSize: "2em", display: "inline-block" }}
+              repeat={Infinity}
+            />
+          )}
+          {selectedOption && (
+            <p className="text-lg text-black">
+              {descriptions[selectedOption as keyof typeof descriptions]}
+            </p>
+          )}
+          <form
+            onSubmit={handleSubmit}
+            className="flex w-full max-w-lg items-center space-x-4"
+          >
+            <Input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Enter YouTube video link"
+              className="flex-grow"
+            />
+            <Select onValueChange={handleOnChange} defaultValue="">
+              <SelectTrigger id="textOperation">
+                <SelectValue placeholder="Choose Operation" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="article">Generate Article</SelectItem>
+                <SelectItem value="repurpose">Repurpose Content</SelectItem>
+                <SelectItem value="summary">Summarize Video</SelectItem>
+                <SelectItem value="transcribe">Transcribe Video</SelectItem>
+                {/* Add other operations as needed */}
+              </SelectContent>
+            </Select>
+            <Button disabled={loading} className="bg-gradient-to-r from-blue-600  to-violet-700 hover:from-violet-700 hover:to-blue-600">
+              Analyze
+              {loading && <ReloadIcon className="ml-2 h-4 w-4 animate-spin" />}
+              {!loading && <MagnifyingGlassIcon className="ml-2 h-4 w-4" />}
+            </Button>
+          </form>
+          {summarizeLoading && <div>Loading...</div>}
+        </div>
+      )}
+    </div>
   );
 }
