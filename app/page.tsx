@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import { ReloadIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import AuthButton from "./components/AuthButton";
 
-
 import {
   Select,
   SelectContent,
@@ -43,6 +42,18 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [youtubeLists, setYoutubeLists] = useState<string[]>([]);
   const [summarizeLoading, setSummarizeLoading] = useState<boolean>(false);
+  const [selectedOption, setSelectedOption] = useState("");
+
+  const descriptions = {
+    summary:
+      "Create a concise overview highlighting the key points of the video.",
+    repurpose:
+      "Using the transcript of a YouTube video, rewrite the content to create a new piece that conveys similar ideas and information but in a fresh and original manner",
+    transcribe:
+      "Convert the video dialogue into a comprehensive transcript, ready for use as textual content.",
+    article:
+      "Craft a well-structured article that captures the essence and details of the video's content.",
+  };
 
   const [summarizeDetail, setSummarizeDetail] = useState<any>(null);
 
@@ -56,7 +67,6 @@ export default function Home() {
         videoPath: videoPath,
       }),
     });
-    console.log("this is chat", chatGPTResponse);
     return chatGPTResponse;
   };
 
@@ -115,9 +125,8 @@ export default function Home() {
         const resultText = await response.text(); // Get text response
         const result = resultText ? JSON.parse(resultText) : {}; // Safely parse JSON
         setDetail(result);
-  
-   
-        console.log(result)
+
+        console.log(result);
 
         const chatGPTResponse = await Transcribe(result.videoPath);
 
@@ -170,30 +179,37 @@ export default function Home() {
 
   const handleOnChange = (e: any) => {
     setLanguage(e);
+    setSelectedOption(e);
   };
 
   const handleMode = (e: string) => {
     console.log(e);
   };
   return (
-    <div className="flex h-screen w-full items-center justify-center ">
-
-      <div className="flex flex-col items-center space-y-8 rounded-lg  p-12">
+    <div className="flex h-screen w-full items-center justify-center">
+    {summarizeDetail ? (
+      <div className="rounded-xl p-6 bg-white shadow-lg max-w-[800px] mx-auto">
+        <h2 className="text-2xl font-bold text-center mb-4">Video Summary</h2>
+        <p className="text-lg text-gray-800 leading-relaxed">{summarizeDetail}</p>
+      </div>
+    ) : (
+      <div className="flex flex-col items-center space-y-8 rounded-lg p-12">
         <span>
-          <h1 className=" font-bold text-6xl bg-gradient-to-r from-violet-400 via-blue-600 to-violet-700 inline-block text-transparent bg-clip-text">
-            Summarize
+          <h1 className="font-bold text-6xl bg-gradient-to-r from-violet-400 via-blue-600 to-violet-700 inline-block text-transparent bg-clip-text">
+            Repurpose
           </h1>
-        </span>{" "}
-        <span>
-          {" "}
-          <h1 className="font-bold text-6xl">Youtube Video</h1>
         </span>
-        <p className="text-lg text-black">
-          Enter a YouTube video link to get its summary.
-        </p>
+        <span>
+          <h1 className="font-bold text-6xl">Popular Youtube Content</h1>
+        </span>
+        {selectedOption && (
+          <p className="text-lg text-black">
+            {descriptions[selectedOption as keyof typeof descriptions]}
+          </p>
+        )}
         <form
-          onSubmit={(e) => handleSubmit(e)}
-          className="flex w-full max-w-md items-center space-x-4"
+          onSubmit={handleSubmit}
+          className="flex w-full max-w-lg items-center space-x-4"
         >
           <Input
             value={url}
@@ -201,17 +217,16 @@ export default function Home() {
             placeholder="Enter YouTube video link"
             className="flex-grow"
           />
-          <Select
-            onValueChange={(e) => handleOnChange(e)}
-            defaultValue={language}
-          >
-            <SelectTrigger id="language">
-              <SelectValue placeholder="Select Language" />
+          <Select onValueChange={handleOnChange} defaultValue="">
+            <SelectTrigger id="textOperation">
+              <SelectValue placeholder="Choose Operation" />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="th">Thai</SelectItem>
-              <SelectItem value="en">English</SelectItem>
-              {/* Add other languages as needed */}
+              <SelectItem value="article">Generate Article</SelectItem>
+              <SelectItem value="repurpose">Repurpose Content</SelectItem>
+              <SelectItem value="summary">Summarize Video</SelectItem>
+              <SelectItem value="transcribe">Transcribe Video</SelectItem>
+              {/* Add other operations as needed */}
             </SelectContent>
           </Select>
           <Button disabled={loading} className="bg-[#0d6efd]">
@@ -221,17 +236,9 @@ export default function Home() {
           </Button>
         </form>
         {summarizeLoading && <div>Loading...</div>}
-        <div className="text-center text-white max-w-2xl">
-          {summarizeDetail && !summarizeLoading && (
-            <div className="rounded-xl p-6 text-sm">
-              <h2 className="text-2xl font-bold text-center mb-4">
-                Video Summary
-              </h2>
-              <p className="text-lg text-black">{summarizeDetail}</p>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
+    )}
+  </div>
+  
   );
 }

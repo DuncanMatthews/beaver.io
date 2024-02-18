@@ -7,74 +7,59 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 
 export async function POST(request: NextRequest) {
-  const data = await request.json()
+  const data = await request.json();
 
-console.log("this is data", data)
+  let prompt = data.text;
+  let systemPrompt = "";
+
+  // Define prompts for different operations using if-else
+  if (data.language === "article") {
+    systemPrompt =
+      'I want you to act as a journalist. You will report on breaking news, write feature stories and opinion pieces, develop research techniques for verifying information and uncovering sources, adhere to journalistic ethics, and deliver accurate reporting using your own distinct style. The first suggestion request is: "I need help writing an article about air pollution in major cities around the world."';
+  } else if (data.language === "repurpose") {
+    systemPrompt =
+      'Given a piece of content, creatively repurpose it into a different format that engages a new audience. This could involve converting a blog post into a script for a video, a video into an infographic, or an article into a podcast script. Be innovative and ensure the repurposed content is engaging and suitable for the target format.';
+  } else if (data.language === "summary") {
+    systemPrompt =
+      'Given a transcription of a YouTube video, create a concise summary that captures the main points, insights, or instructions presented in the video. The summary should be structured to include a list of key points or steps (if applicable), and a concluding statement.';
+  } else if (data.language === "transcribe") {
+    systemPrompt =
+      'Transcribe the provided video content into text, ensuring accuracy and attention to detail. Include timestamps if necessary, and format the transcription clearly to reflect different speakers or significant audio cues.';
+  }
+  // Add other operations as needed with additional else if statements
 
   try {
-    let promptTh = ""
-    let promptEn = ""
-    let systemPromptTh = ""
-    let systemPromptEn = ""
-    if (data.isYoutube) {
-      promptTh = data.text
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      n: 1,
+      stream: false,
+      stop: null,
+      temperature: 0.7,
+      top_p: 1,
+    });
 
-      promptEn = data.text
+    const answer = response.choices[0].message.content || "Sorry, I don't know";
 
-      systemPromptTh =
-        'คุณจะให้ขั้นตอนทั้งหมดมา และ งานของคุณคือ ช่วยสรุป และให้คำแนะนำในการทำอาหาร ทีละขั้นตอนแบบละเอียด หรือ เป็นหัวข้อย่อย พร้อมบอกสิ่งที่ต้องไปซื้อ เพื่อง่ายต่อการทำตาม และให้คำตอบเป็น json format ตามนี้ {title: "", steps: [], ingredients, conclusion: ""}'
-      systemPromptEn =
-        'Given a transcription of a YouTube video, create a concise summary that captures the main points, insights, or instructions presented in the video. The summary should be structured to include a list of key points or steps (if applicable), and a concluding statement.'
-    } else {
-      promptTh = data.text
-
-      promptEn = data.text
-
-      systemPromptTh =
-        'คุณจะให้เมนู หรือชื่อ อาหารมา งานของคุณคือ บอกขั้นตอน และให้คำแนะนำในการทำอาหาร ทีละขั้นตอนแบบละเอียด หรือ เป็นหัวข้อย่อย พร้อมบอกสิ่งที่ต้องไปซื้อ เพื่อง่ายต่อการทำตาม และให้คำตอบเป็น json format ตามนี้ {title: "", steps: [], ingredients, conclusion: ""}'
-
-      systemPromptEn =
-        'Given a transcription of a YouTube video, create a concise summary that captures the main points, insights, or instructions presented in the video. The summary should be structured to include a list of key points or steps (if applicable), and a concluding statement.'
-    }
-
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: data.language === "th" ? systemPromptTh : systemPromptEn,
-          },
-          {
-            role: "user",
-            content: data.language === "th" ? promptTh : promptEn,
-          },
-        ],
-        n: 1,
-        stream: false,
-        stop: null,
-        temperature: 0.7,
-        top_p: 1,
-      })
-      const answer =
-        response.choices[0].message.content || "Sorry I don't know"
-
-        console.log("this is answer", answer)
-
-
-        return NextResponse.json({
-          summarize: answer,
-        });
-        
-    } catch (error) {
-      throw error
-    }
+    return NextResponse.json({
+      summarize: answer,
+    });
   } catch (error: any) {
     return new Response(JSON.stringify(error.response?.data?.error), {
       status: error.response?.status,
-    })
+    });
   }
 }
+
 
 export async function GET(request: NextRequest) {
   try {
