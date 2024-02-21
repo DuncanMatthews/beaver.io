@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
 
 
   // Check if the user is not signed in
-  if (!session.data.session) {
+  if (session.data.session) {
     // Redirect to the sign-in page, using the request's origin for proper redirect URL
     const url = new URL('/login', request.url);
     return NextResponse.redirect(url);

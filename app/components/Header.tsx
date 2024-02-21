@@ -4,6 +4,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import AuthButton from "./AuthButton"
 
+import { IntrinsicAttributes } from "react"
+
 export default function Header() {
   return (
 <header className="bg-white dark:bg-gray-800 shadow">
