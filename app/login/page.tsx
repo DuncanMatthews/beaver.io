@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers, cookies } from "next/headers";
 import { createClient } from "../utils/supabase/server";
 import { redirect } from "next/navigation";
-import {signInWithEmail} from "../actions";
+
 
 export default function Login({
   searchParams,
