@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "./components/Header";
+import { Label } from "@radix-ui/react-select";
+import Link from "next/link";
 
 function extractYouTubeVideoId(url: string) {
   const regex =
@@ -37,23 +39,35 @@ function isValidYouTubeUrl(url: string) {
 export default function Home() {
   const [url, setUrl] = useState("");
   const [detail, setDetail] = useState<any>(null);
-  const [language, setLanguage] = useState<string>("th");
+  const [language, setLanguage] = useState<string>("Choose Audience");
   const [mode, setMode] = useState<"search" | "flow">("search");
   const [isYoutube, setIsYoutube] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [youtubeLists, setYoutubeLists] = useState<string[]>([]);
   const [summarizeLoading, setSummarizeLoading] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState("");
+  const [contentLength, setContentLength] = useState("");
+
+  const defaultValues = {
+    url: "https://www.youtube.com/watch?v=YvzwrSCCu8A",
+    language: "professionals", // Assuming this is the value that matches one of the SelectItem values
+    contentLength: "1500",
+  };
+
+  const populateDefaults = () => {
+    setUrl(defaultValues.url);
+    setLanguage(defaultValues.language); // Assuming you have a setLanguage function
+    setContentLength(defaultValues.contentLength);
+  };
 
   const descriptions = {
-    summary:
-      "Create a concise overview highlighting the key points of the video.",
-    repurpose:
-      "Using the transcript of a YouTube video, rewrite the content to create a new piece that conveys similar ideas and information but in a fresh and original manner",
-    transcribe:
-      "Convert the video dialogue into a comprehensive transcript, ready for use as textual content.",
-    article:
-      "Craft a well-structured article that captures the essence and details of the video's content.",
+    professionals:
+      "Focused on industry-specific insights and practical applications, catering to individuals seeking to advance their professional skill sets and industry knowledge.",
+    academics:
+      "Tailored for the scholarly community, emphasizing rigorous analysis, theoretical frameworks, and contributions to academic discourse.",
+    executives:
+      "Designed for business leaders, highlighting strategic thinking, leadership insights, market trends, and corporate innovation.",
+    tech: "Geared towards technology aficionados, covering the latest in tech innovations and trends, and providing in-depth technical knowledge.",
   };
 
   const [summarizeDetail, setSummarizeDetail] = useState<any>(null);
@@ -81,6 +95,7 @@ export default function Home() {
         text: transcription,
         isYoutube: true,
         language: language,
+        contentLength: parseInt(contentLength),
       }),
     });
     console.log("this is summarize", summarizeResponse);
@@ -187,14 +202,12 @@ export default function Home() {
     console.log(e);
   };
   return (
-    <div className="flex  w-full items-center justify-center">
+    <div className="flex  items-center justify-center">
       {summarizeDetail ? (
-        <div className="rounded-xl p-6 bg-white shadow-lg max-w-[800px] mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-4">Video Summary</h2>
-          <p className="text-lg text-gray-800 leading-relaxed">
-            {summarizeDetail}
-          </p>
-        </div>
+        <div
+          className="px-80 mt-5 mx-40"
+          dangerouslySetInnerHTML={{ __html: summarizeDetail }}
+        />
       ) : (
         <div className="flex flex-col items-center space-y-8 rounded-lg p-12">
           <span>
@@ -204,26 +217,27 @@ export default function Home() {
           </span>
 
           <span>
-            <h1 className="font-bold text-6xl">Popular Youtube Video&apos;s</h1>
+            <h1 className="font-bold text-6xl">Your Video Content</h1>
           </span>
           {!selectedOption && (
-            <TypeAnimation
-              sequence={[
-                // Same substring at the start will only be typed out once, initially
-                "for Podcasts",
-                1000, // wait 1s before replacing "Mice" with "Hamsters"
-                "for Articles",
-                1000,
-                "for Video Transcripts",
-                1000,
-                "for Summaries",
-                1000,
-              ]}
-              wrapper="span"
-              speed={50}
-              style={{ fontSize: "2em", display: "inline-block" }}
-              repeat={Infinity}
-            />
+            <div className="mb-10">
+              <TypeAnimation
+                sequence={[
+                  // Same substring at the start will only be typed out once, initially
+                  "Create SEO Optimized Content",
+                  1000, // wait 1s before replacing "Mice" with "Hamsters"
+                  "Re-engage Your Audience",
+                  1000,
+                  "Reuse Content for Blogs",
+                  1000,
+                  "Generate Video Summaries",
+                ]}
+                wrapper="span"
+                speed={50}
+                style={{ fontSize: "2em", display: "inline-block" }}
+                repeat={Infinity}
+              />
+            </div>
           )}
           {selectedOption && (
             <p className="text-lg text-black">
@@ -232,32 +246,108 @@ export default function Home() {
           )}
           <form
             onSubmit={handleSubmit}
-            className="flex w-full max-w-lg items-center space-x-4"
+            className="flex flex-col items-center justify-center space-x-3 space-y-4"
           >
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="Enter YouTube video link"
-              className="flex-grow"
-            />
-            <Select onValueChange={handleOnChange} defaultValue="">
-              <SelectTrigger id="textOperation">
-                <SelectValue placeholder="Choose Operation" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="article">Generate Article</SelectItem>
-                <SelectItem value="repurpose">Repurpose Content</SelectItem>
-                <SelectItem value="summary">Summarize Video</SelectItem>
-                <SelectItem value="transcribe">Transcribe Video</SelectItem>
-                {/* Add other operations as needed */}
-              </SelectContent>
-            </Select>
-            <Button disabled={loading} className="bg-gradient-to-r from-blue-600  to-violet-700 hover:from-violet-700 hover:to-blue-600">
-              Analyze
-              {loading && <ReloadIcon className="ml-2 h-4 w-4 animate-spin" />}
-              {!loading && <MagnifyingGlassIcon className="ml-2 h-4 w-4" />}
-            </Button>
+            <div className="flex flex-wrap justify-center items-end space-x-4">
+              <div className="flex flex-col space-y-1">
+                <label
+                  htmlFor="url"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  URL
+                </label>
+                <input
+                  type="text"
+                  id="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Enter YouTube video link"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              <div className="flex flex-col space-y-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  Language
+                </label>
+                <Select onValueChange={handleOnChange} defaultValue="">
+                  <SelectTrigger
+                    id="textOperation"
+                    className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <SelectValue placeholder={language} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="z-10">
+                    <SelectItem value="professionals">Professionals</SelectItem>
+                    <SelectItem value="academics">Academics</SelectItem>
+                    <SelectItem value="executives">
+                      Business Executives
+                    </SelectItem>
+                    <SelectItem value="tech">Tech Enthusiasts</SelectItem>
+                    {/* Additional options can be uncommented or added here */}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col space-y-1">
+                <label
+                  htmlFor="contentLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Content Length
+                </label>
+                <input
+                  type="number"
+                  id="contentLength"
+                  value={contentLength}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    if (newValue <= 1500) {
+                      setContentLength(newValue.toString()); // Convert the newValue to a string before updating the state
+                    }
+                  }}
+                  placeholder="500"
+                  className="mt-1 block w-24 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  max="1500" // This restricts the input to 1500 max
+                />
+              </div>
+
+              <Button type="submit" disabled={loading} className="ml-5">
+                Create
+                {loading && (
+                  <svg
+                    className="ml-2 h-4 w-4 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                {!loading && <MagnifyingGlassIcon className="ml-2 h-4 w-4" />}
+              </Button>
+            </div>
+            <button
+              type="button"
+              onClick={populateDefaults}
+              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
+            >
+              Click to populate fields with default values
+            </button>
           </form>
+
           {summarizeLoading && <div>Loading...</div>}
         </div>
       )}

@@ -3,7 +3,6 @@ import { headers, cookies } from "next/headers";
 import { createClient } from "../utils/supabase/server";
 import { redirect } from "next/navigation";
 
-
 export default function Login({
   searchParams,
 }: {
@@ -31,37 +30,24 @@ export default function Login({
     return redirect("/");
   };
 
-  const signUp = async (formData: FormData) => {
+  const signInWithGoogle = async () => {
     "use server";
 
-    const origin = headers().get("origin");
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${location.origin}/auth/callback` },
     });
 
     if (error) {
-      return redirect("/account/login?message=Could not authenticate user");
+      console.error("Error signing in with Google:", error.message);
+      return;
     }
 
-    return redirect(
-      "/account/login?message=Check email to continue sign in process"
-    );
+    // Optionally handle redirects or state updates here
   };
-
-  const handleSignUpClick = async () => {
-    "use server";
-    redirect("/sign-up");
-  };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
@@ -137,16 +123,15 @@ export default function Login({
             >
               Sign in
             </button>
-            
-          </div>
-          <div>
-            <Link href="/sign-up">
-              <p className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Sign Up
-              </p>
-            </Link>
           </div>
         </form>
+        <div>
+          <Link href="/sign-up">
+            <p className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Sign Up
+            </p>
+          </Link>
+        </div>
         {searchParams?.message && (
           <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-700">
             {searchParams.message}

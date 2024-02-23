@@ -111,3 +111,67 @@
 .react-flow__node-source {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
 }
+
+h2 {
+  font-size: 1.5rem; /* Example size, adjust as needed */
+  font-weight: bold; /* Typically h2 is bold */
+  margin-top: 1em; /* Space above the h2 */
+  margin-bottom: 0.5em; /* Space below the h2 */
+  color: #333; /* A dark grey color, adjust the color as needed */
+  text-align: left; /* If you want to center your h2 headings */
+  /* Add any other styles you want for h2 elements */
+}
+
+
+h3 {
+  font-size: 1.2rem; /* Example size, adjust as needed */
+  font-weight: bold; /* Typically h2 is bold */
+  margin-top: 1em; /* Space above the h2 */
+  margin-bottom: 0.5em; /* Space below the h2 */
+  color: #333; /* A dark grey color, adjust the color as needed */
+  text-align: left; /* If you want to center your h2 headings */
+  /* Add any other styles you want for h2 elements */
+}
+
+h1 {
+  font-size: 2rem; /* Example size, adjust as needed */
+  font-weight: bold; /* Typically h2 is bold */
+  margin-top: 0.1em; /* Space above the h2 */
+  margin-bottom: 0.1em; /* Space below the h2 */
+  color: #333; /* A dark grey color, adjust the color as needed */
+  text-align: left; /* If you want to center your h2 headings */
+  /* Add any other styles you want for h2 elements */
+}
+
+p {
+  font-size: 1rem; /* Example size, adjust as needed */
+  margin-top: 1em; /* Space above the h2 */
+  margin-bottom: 0.5em; /* Space below the h2 */
+  color: #333; /* A dark grey color, adjust the color as needed */
+  text-align: left; /* If you want to center your h2 headings */
+  /* Add any other styles you want for h2 elements */
+}
+
+ul {
+  list-style-type: disc; /* Default list style */
+  padding-left: 2em; /* Indentation for list */
+  margin-top: 1em; /* Space above the list */
+  margin-bottom: 1em; /* Space below the list */
+  /* Add any other styles you want for ul elements */
+}
+
+/* Style for ordered lists */
+ol {
+  list-style-type: decimal; /* Default list style */
+  padding-left: 2em; /* Indentation for list */
+  margin-top: 1em; /* Space above the list */
+  margin-bottom: 1em; /* Space below the list */
+  /* Add any other styles you want for ol elements */
+}
+
+/* Style for list items */
+li {
+  margin-bottom: 0.5em; /* Space between list items */
+  line-height: 1.6; /* Line height for list items */
+  /* Add any other styles you want for li elements */
+}

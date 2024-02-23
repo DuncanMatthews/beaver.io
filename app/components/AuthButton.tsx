@@ -20,6 +20,18 @@ export default async function AuthButton() {
     return redirect("/login");
   };
 
+  const signInWithGoogle = async () => {
+    "use server";
+
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    return redirect("/");
+  };
+
   return user ? (
     <div className="flex items-center gap-4">
       Hey, {user.email}!
@@ -30,12 +42,14 @@ export default async function AuthButton() {
       </form>
     </div>
   ) : (
+    <div className="flex">
     <Link
       href="/login"
       className="py-2 px-3 flex rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
     >
       Login
     </Link>
-    
+   
+    </div>
   );
 }

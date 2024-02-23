@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const filePath = data.videoPath; // Assuming the file path is passed in the request body
 
-    console.log("this is file ", filePath); // Log the file path for debugging
 
     // Perform the transcription. This assumes the file exists and is accessible
     const transcription = await openai.audio.transcriptions.create({
@@ -19,7 +18,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Assuming the API's response object correctly maps to your usage
-    console.log(transcription.text); // Log the transcription for debugging
     return NextResponse.json({ transcription: transcription.text
     });
 
