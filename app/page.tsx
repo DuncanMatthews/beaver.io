@@ -209,7 +209,7 @@ export default function Home() {
           dangerouslySetInnerHTML={{ __html: summarizeDetail }}
         />
       ) : (
-        <div className="flex flex-col items-center space-y-8 rounded-lg p-12">
+        <div className="flex flex-col items-center  rounded-lg p-12">
           <span>
             <h1 className="font-bold text-6xl bg-gradient-to-r from-violet-400 via-blue-600 to-violet-700 inline-block text-transparent bg-clip-text">
               Repurpose
