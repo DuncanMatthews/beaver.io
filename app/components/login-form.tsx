@@ -1,35 +1,106 @@
-"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import type { Session } from "@supabase/auth-helpers-nextjs";
+const FormSchema = z.object({
+	email: z.string().email(),
+	password: z.string().min(1, {
+		message: "Password is required.",
+	}),
+});
 
-export default function LoginForm({ session }: { session: Session | null }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
-  const supabase = createClientComponentClient();
+export default function SignInForm() {
+	const form = useForm<z.infer<typeof FormSchema>>({
+		resolver: zodResolver(FormSchema),
+		defaultValues: {
+			email: "",
+			password: "",
+		},
+	});
 
-  const signInWithOAuth = async () => {
-    supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
-  };
+	function onSubmit(data: z.infer<typeof FormSchema>) {
+		toast({
+			title: "You submitted the following values:",
+			description: (
+				<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+					<code className="text-white">
+						{JSON.stringify(data, null, 2)}
+					</code>
+				</pre>
+			),
+		});
+	}
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.refresh();
-  };
+	return (
+		<Form {...form}>
+			<form
+				onSubmit={form.handleSubmit(onSubmit)}
+				className="w-full space-y-6"
+			>
+				<FormField
+					control={form.control}
+					name="email"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Email</FormLabel>
+							<FormControl>
+								<Input
+									placeholder="example@gmail.com"
+									{...field}
+									type="email"
+									onChange={field.onChange}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="password"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Password</FormLabel>
+							<FormControl>
+								<Input
+									placeholder="password"
+									{...field}
+									type="password"
+									onChange={field.onChange}
+								/>
+							</FormControl>
 
-  // for the `session` to be available on first SSR render, it must be
-  // fetched in a Server Component and passed down as a prop
-  return session ? (
-    <button onClick={handleSignOut}>Sign out</button>
-  ) : (
-    <>
-      <button onClick={signInWithOAuth}>Sign in</button>
-    </>
-  );
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<Button type="submit" className="w-full flex gap-2">
+					SignIn
+                    <AiOutlineLoading3Quarters
+                        className={cn(
+                            form.formState.isSubmitting
+                                ? "animate-spin"
+                                : "hidden"
+                        )}
+                    />
+
+
+				</Button>
+			</form>
+		</Form>
+	);
 }

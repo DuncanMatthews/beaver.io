@@ -20,17 +20,7 @@ export default async function AuthButton() {
     return redirect("/login");
   };
 
-  const signInWithGoogle = async () => {
-    "use server";
-
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
-
-    return redirect("/");
-  };
+  
 
   return user ? (
     <div className="flex items-center gap-4">

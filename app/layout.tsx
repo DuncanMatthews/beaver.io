@@ -2,6 +2,7 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { createClient } from "@supabase/supabase-js"
 import Header from "./components/Header"
+import { Toaster } from "@/components/ui/toaster"
 
 
 
@@ -32,7 +33,7 @@ export default function Layout({
       
       <body suppressHydrationWarning={true} className=''>
       <Header />
-       {children}
+       {children}<Toaster />
       </body>
     </html>
   )
