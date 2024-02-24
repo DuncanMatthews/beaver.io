@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import OpenAI from "openai";
-import fetch from 'node-fetch'; // Import fetch to handle downloading the file
 
 
 // Ensure OPENAI_API_KEY is set in your environment variables
