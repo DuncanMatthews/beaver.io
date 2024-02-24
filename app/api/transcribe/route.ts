@@ -16,6 +16,10 @@ export async function POST(request: NextRequest) {
     if (!response.ok) throw new Error(`Failed to fetch the file: ${response.statusText}`);
     const buffer = response; // Get the file content as a buffer
 
+    if(response.ok) {
+      return NextResponse.json({ message: 'File fetched successfully' });
+    }
+
 
     console.log('this is the file path', filePath);
 
@@ -24,6 +28,8 @@ export async function POST(request: NextRequest) {
       file: buffer,
       model: "whisper-1",
     });
+
+    
 
 
     // Assuming the API's response object correctly maps to your usage
