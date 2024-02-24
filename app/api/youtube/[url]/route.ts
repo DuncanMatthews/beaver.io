@@ -1,54 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
 import ytdl from "ytdl-core";
-import fs from "fs";
-import path from "path";
-import { pipeline } from "stream";
-import os from "os"; // Import the os module
+import { createClient } from "@supabase/supabase-js";
+
+// Assuming these are server-side operations and your variables are correctly set
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function GET(request: NextRequest, context: { params: { url: string } }) {
   const youtubeUrl = `https://www.youtube.com/watch?v=${context?.params?.url}`;
-  const url = context?.params?.url;
+
 
   function sanitizeFileName(input: string) {
-    return input
-      .replace(/[^a-zA-Z0-9 -]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with -
-      .slice(0, 100); // Limit to 100 characters to avoid path length issues
+    return input.replace(/[^a-zA-Z0-9 -]/g, '').replace(/\s+/g, '-').slice(0, 100);
   }
 
   try {
     const info = await ytdl.getBasicInfo(youtubeUrl);
+    console.log("ths is ", info.videoDetails.title);
     const title = sanitizeFileName(info.videoDetails.title);
-    console.log("title", title);
-
-    // Use os.tmpdir() to get the path to the system's temporary directory
-    const tempDir = os.tmpdir();
-    const videoPath = path.resolve(tempDir, `${title}.mp3`);
-    console.log("videoPath", videoPath);
-
     const downloadStream = ytdl(youtubeUrl, { filter: "audioonly" });
-    console.log("downloadStream", downloadStream);
-    const writeStream = fs.createWriteStream(videoPath);
 
-    await new Promise((resolve, reject) => {
-      pipeline(downloadStream, writeStream, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(title);
-        }
+
+    // Accumulate chunks from the stream
+    const chunks = [];
+    for await (let chunk of downloadStream) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
+
+    // Upload the buffer to Supabase Storage
+    // Assuming videoBuffer is your video data as a Buffer
+    const { data, error } = await supabase
+      .storage
+      .from('videos')
+      .upload(`audio/${title}.mp3`, buffer, {
+        contentType: 'audio/mpeg'
       });
-    });
+
+
+
+
+    console.log("this is the data", data);
+
+    // // Construct the public URL for the uploaded file
+    // // Adjust the URL pattern according to your Supabase setup
+    const response  = supabase.storage.from('videos').getPublicUrl(`audio/${title}.mp3`)
+
+    const { data: { publicUrl } } = response;
+
+    console.log("this is the public url", publicUrl);
+
+ 
+
+
+
 
     return NextResponse.json({
-      title: title,
+      title,
       name: info.videoDetails.title,
-      videoPath: videoPath, // Note: This path is temporary and may not persist
-      id: url,
+      videoPath: publicUrl, // This should be the accessible URL of the uploaded file
+      id: context?.params?.url,
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify(error.response?.data?.error), {
-      status: error.response?.status,
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    return new Response(JSON.stringify({ error: 'An error occurred' }), {
+      status: 500,
     });
   }
 }

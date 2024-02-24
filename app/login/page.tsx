@@ -1,143 +1,178 @@
+"use client";
+
+import { useState } from "react";
+import { redirect, useRouter } from "next/navigation";
+import { createClient } from "../utils/supabase/client";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { headers, cookies } from "next/headers";
-import { createClient } from "../utils/supabase/server";
-import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
 
-export default function Login({
-  searchParams,
-}: {
-  searchParams: { message: string };
-}) {
-  const signIn = async (formData: FormData) => {
-    "use server";
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+if (!supabaseUrl) {
+  throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_URL");
+}
 
-    const { error } = await supabase.auth.signInWithPassword({
+if (!supabaseAnonKey) {
+  throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY");
+}
+
+const supabase = createClient();
+
+export default function LoginComponent() {
+  const [email, setEmail] = useState("");
+  const [magicEmail, setMagicEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = async (event: { preventDefault: () => void }) => {
+    event.preventDefault(); // Prevent the form from submitting in the traditional way
+    setLoading(true);
+
+    // Attempt to sign in with email and password
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    console.log(error);
+    setLoading(false);
+
+    //refresh the page
 
     if (error) {
-      return redirect("/login?message=Could not authenticate user");
-    }
-
-    return redirect("/");
-  };
-
-  const signInWithGoogle = async () => {
-    "use server";
-
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
-
-    if (error) {
-      console.error("Error signing in with Google:", error.message);
+      alert(error.message);
       return;
     }
 
-    // Optionally handle redirects or state updates here
+    router.push("/");
+  };
+
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      alert(error.message);
+    }
+    setLoading(false);
+  };
+
+  const magicLink = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email: magicEmail,
+      options: {
+        emailRedirectTo: "https://local.com/auth/callback",
+      },
+    });
+
+    if (!data.user) {
+      alert("You need to sign up first!");
+    }
+
+    if (error) {
+      alert(error.message || error.message);
+    } else {
+      alert("Check your email for the login link!");
+    }
+    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <Link
-            href="/"
-            className="flex items-center text-gray-600 hover:text-gray-500"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back
-          </Link>
-        </div>
-        <form className="mt-8 space-y-6" action={signIn}>
-          <input type="hidden" name="remember" value="true" />
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 my-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Link
-                href="/account/reset-password"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
-        <div>
-          <Link href="/sign-up">
-            <p className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Sign Up
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold">Login</h1>
+            <p className="text-gray-500">
+              Enter your email and password below to login to your account
             </p>
-          </Link>
-        </div>
-        {searchParams?.message && (
-          <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-700">
-            {searchParams.message}
           </div>
-        )}
+
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+
+          <Button
+            className="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Login"}
+          </Button>
+        </form>
+
+        {/* OAuth Providers */}
+        <Button
+          className="w-full px-4 my-3 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          onClick={signInWithGoogle}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Login with Google"}
+        </Button>
+   
+        <Link className="text-center" href="/sign-up">Sign Up</Link>
+    
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Sign in via magic link with your email below
+          </p>
+          <form className="mt-3" onSubmit={magicLink}>
+            <div className="mb-4">
+              <input
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                type="email"
+                placeholder="Your email"
+                value={magicEmail}
+                required={true}
+                onChange={(e) => setMagicEmail(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Button
+                className={`w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span>Loading...</span>
+                ) : (
+                  <span>Send magic link</span>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
+      <Link href="/forgot-password">Forgot your password?</Link>
     </div>
   );
 }

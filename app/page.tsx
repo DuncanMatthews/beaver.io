@@ -117,12 +117,7 @@ export default function Home() {
     return summarizeResponse;
   };
 
-  const YoutubeRelatedVideos = async (keywords: string, language: string) => {
-    const searchYouTuberRsponse = await fetch(
-      `/api/related/${keywords}/${language}`
-    );
-    return searchYouTuberRsponse;
-  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission behavior
     setLoading(true);
@@ -133,6 +128,7 @@ export default function Home() {
       if (isValidYouTubeUrl(url)) {
         const youtubeId = extractYouTubeVideoId(url);
         const response = await fetch(`/api/youtube/${youtubeId}`);
+        
 
         if (!response.ok) {
           throw new Error("Failed to fetch video details.");
@@ -170,19 +166,9 @@ export default function Home() {
         const summarizeData = await summarizeResponse.json();
         setSummarizeDetail(summarizeData.summarize); // Assuming summarizeData.summarize is already a stringified JSON
 
-        const searchYouTuberResponse = await YoutubeRelatedVideos(
-          url,
-          language
-        );
-        if (!searchYouTuberResponse.ok) {
-          throw new Error("Failed to fetch related YouTube videos.");
-        }
+       
 
-        const searchYouTuberResult = await searchYouTuberResponse.json();
-        const mapVideoIds = searchYouTuberResult.videos.map((item: string) =>
-          extractYouTubeVideoId(item)
-        );
-        setYoutubeLists(mapVideoIds);
+
       }
     } catch (error) {
       console.error(error);

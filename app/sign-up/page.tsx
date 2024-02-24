@@ -13,13 +13,7 @@ export default function SignUp({
 }) {
   const [result, formAction] = useFormState(signUp, null);
 
-  // const magicLink = async (formData: FormData) => {
-  //   "use server";
 
-  //   const email = formData.get("email") as string;
-
-  //   // Sign in with magic links
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

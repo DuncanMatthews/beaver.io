@@ -38,3 +38,16 @@ export async function signUp (prevState: any, formData: FormData)  {
  
     return redirect("/sign-up?message=Check email to continue sign in process");
   };
+
+
+export async function getUser() {
+  const { data: userData, error } = await supabase.auth.getSession();
+  if (error) {
+    console.log(error);
+  }
+
+  const userDataString = JSON.stringify(userData);
+
+
+  return userDataString;
+}
